@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
   FlatList,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -104,9 +105,24 @@ export default function HomeScreen() {
               router.push({ pathname: "/note/[id]", params: { id: item.id } })
             }
           >
-            <Text style={styles.title}>{item.title}</Text>
+            <View style={styles.noteContent}>
+              <View style={styles.textContent}>
+                <Text style={styles.title} numberOfLines={1}>
+                  {item.title}
+                </Text>
+                <Text style={styles.description} numberOfLines={2}>
+                  {item.text}
+                </Text>
+              </View>
 
-            <Text numberOfLines={1}>{item.text}</Text>
+              {item.picture_url && (
+                <Image
+                  source={{ uri: item.picture_url }}
+                  style={styles.thumbnail}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
           </TouchableOpacity>
         )}
         ListEmptyComponent={
@@ -154,18 +170,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
   },
-
-  item: {
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-
   fab: {
     position: "absolute",
     right: 20,
@@ -181,5 +185,34 @@ const styles = StyleSheet.create({
   fabText: {
     color: "white",
     fontSize: 30,
+  },
+  item: {
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  noteContent: {
+    flexDirection: "row", // Puts text and image side-by-side
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  textContent: {
+    flex: 1, // Takes up remaining space
+    marginRight: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  description: {
+    color: "#666",
+    fontSize: 14,
+  },
+  thumbnail: {
+    width: 60,
+    height: 60,
+    borderRadius: 8, // Rounded corners for a modern look
+    backgroundColor: "#f0f0f0", // Placeholder color while loading
   },
 });
