@@ -18,6 +18,7 @@
     },
     "android": {
       "package": "com.yourcompany.fastnotes",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.NOTIFICATIONS",

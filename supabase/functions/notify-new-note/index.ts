@@ -1,34 +1,60 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// Setup type definitions for built-in Supabase Runtime APIs
-import "@supabase/functions-js/edge-runtime.d.ts"
+serve(async (req) => {
+  try {
+    const payload = await req.json();
+    console.log("Payload received:", JSON.stringify(payload)); // DEBUG LOG
 
+    const newNote = payload.record;
+    if (!newNote) throw new Error("No record in payload");
 
+    const supaBaseClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
-console.log("Hello from Functions!")
+  
+    let query = supaBaseClient
+      .from("profiles")
+      .select("push_token, id")
+      .not("push_token", "is", null);
 
-Deno.serve(async (req) => {
-  const { name } = await req.json()
-  const data = {
-    message: `Hello ${name}!`,
+    
+    if (newNote.user_id) {
+      query = query.neq("id", newNote.user_id);
+    }
+
+    const { data: profiles, error } = await query;
+    if (error) throw error;
+
+    console.log(`Found ${profiles?.length || 0} users to notify`); // DEBUG LOG
+
+    if (!profiles || profiles.length === 0) {
+      return new Response("No target users with tokens found.", { status: 200 });
+    }
+
+    const messages = profiles.map(profile => ({
+      to: profile.push_token,
+      sound: "default",
+      title: `New Note: ${newNote.title || 'Untitled'}`,
+      body: newNote.text || "Someone added a new note!",
+      data: { noteId: newNote.id }
+    }));
+
+    const result = await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(messages),
+    });
+
+    const resData = await result.json();
+    console.log("Expo Response:", JSON.stringify(resData)); // DEBUG LOG
+
+    return new Response(JSON.stringify(resData), { status: 200 });
+
+  } catch (err) {
+    console.error("FUNCTION ERROR:", err.message);
+    return new Response(err.message, { status: 500 });
   }
-
-  return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
-  )
 })
-
-/* To invoke locally:
-
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
-
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/notify-new-note' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
-    --data '{"name":"Functions"}'
-
-*/

@@ -4,14 +4,23 @@ import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useNotes } from "../../context/NoteContext";
 import { useAuthContext } from "../../hooks/auth-context";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () =>
+    ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }) as Notifications.NotificationBehavior,
+});
 
 export default function HomeScreen() {
   const router = useRouter();

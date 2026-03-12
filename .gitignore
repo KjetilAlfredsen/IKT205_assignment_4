@@ -1,5 +1,11 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+fastnotes-firebase-adminsdk-*.json
+google-services.json
+fastnotesassignment3-firebase-adminsdk-fbsvc-79704f7631.json
+credentials.json
+
+
 # dependencies
 node_modules/
 
