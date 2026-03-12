@@ -12,6 +12,7 @@ export interface Note {
   text: string;
   userid?: string;
   created_at?: string;
+  picture_url?: string | null;
 }
 
 interface NotesContextInterface {
@@ -20,6 +21,7 @@ interface NotesContextInterface {
     userId: string,
     title: string,
     text: string,
+    imageUrl: string | null,
   ) => Promise<{ error: any }>;
   getNote: (id: string) => Note | undefined;
   editNote: (
@@ -46,8 +48,13 @@ export function NoteProvider({ children }: { children: React.ReactNode }) {
     refreshNotes();
   }, []);
 
-  const addNote = async (userId: string, title: string, text: string) => {
-    const { error } = await apiCreateNote(userId, title, text);
+  const addNote = async (
+    userId: string,
+    title: string,
+    text: string,
+    imageUrl: string | null = null,
+  ) => {
+    const { error } = await apiCreateNote(userId, title, text, imageUrl);
     if (!error) {
       await refreshNotes();
     }

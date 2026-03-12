@@ -1,12 +1,13 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  StyleSheet,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Button,
+    Image,
+    StyleSheet,
+    TextInput,
+    View,
 } from "react-native";
 import { useNotes } from "../../context/NoteContext";
 
@@ -84,6 +85,10 @@ export default function NoteContentsScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ title: "Edit Note" }} />
 
+      {note.picture_url && (
+        <Image source={{ uri: note.picture_url }} style={styles.noteImage} />
+      )}
+
       <TextInput
         style={styles.title}
         value={title}
@@ -123,6 +128,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  noteImage: {
+    width: "100%",
+    height: 250,
+    marginBottom: 20,
+    resizeMode: "cover",
   },
   title: {
     fontSize: 24,

@@ -5,6 +5,7 @@ export async function apiCreateNote(
   userId: string,
   title: string,
   text: string,
+  imageUrl: string | null = null,
 ) {
   if (!title.trim() || !text.trim()) {
     Alert.alert("Enter both title and text.");
@@ -14,7 +15,12 @@ export async function apiCreateNote(
   try {
     const { data, error } = await supabase
       .from("Note")
-      .insert({ userid: userId, title: title, text: text })
+      .insert({
+        userid: userId,
+        title: title,
+        text: text,
+        picture_url: imageUrl,
+      })
       .select()
       .single();
     return { data, error };

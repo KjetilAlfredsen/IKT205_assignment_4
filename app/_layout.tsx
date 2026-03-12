@@ -20,24 +20,27 @@ function RootNavigator() {
   const { isLoading, isLoggedIn, session } = useAuthContext();
   const router = useRouter();
 
+  useEffect(() => {
+    if (isLoading) return;
+
+    const isAuthenticated = isLoggedIn && session;
+
+    if (!isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isLoading, isLoggedIn, session]);
+
   if (isLoading) return null;
 
   return (
     <Stack>
-      {isLoggedIn && session ? (
-        // Auth-only screens
-        <>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="modal"
-            options={{ title: "New Note", presentation: "modal" }}
-          />
-          <Stack.Screen name="note/[id]" options={{ title: "Details" }} />
-        </>
-      ) : (
-        // Public-only screens
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-      )}
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="modal"
+        options={{ title: "New Note", presentation: "modal" }}
+      />
+      <Stack.Screen name="note/[id]" options={{ title: "Details" }} />
+      <Stack.Screen name="login" options={{ headerShown: false }} />
     </Stack>
   );
 }

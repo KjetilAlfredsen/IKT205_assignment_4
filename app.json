@@ -12,12 +12,19 @@
       "bundleIdentifier": "com.yourcompany.fastnotes",
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Camera access is required to add images to your notes."
+        "NSCameraUsageDescription": "Camera access is required to add images to your notes.",
+        "NSPhotoLibraryUsageDescription": "Photo library access is required to add images to your notes."
       }
     },
     "android": {
       "package": "com.yourcompany.fastnotes",
-      "permissions": ["CAMERA", "NOTIFICATIONS"],
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.NOTIFICATIONS",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ],
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -49,15 +56,16 @@
       "expo-sqlite",
       "expo-secure-store",
       [
-        "expo-camera",
+        "expo-image-picker",
         {
+          "photosPermission": "Photo library access is required to add images to your notes.",
           "cameraPermission": "Camera access is required to add images to your notes."
         }
       ],
       [
         "expo-notifications",
         {
-          "icon": "./assets/icon.png", // replace this icon later
+          "icon": "./assets/images/icon.png",
           "color": "#ffffff"
         }
       ]
@@ -65,6 +73,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ba04c7d2-8461-4ebf-b02b-55be1269941e"
+      }
+    },
+    "owner": "kjetilah"
   }
 }

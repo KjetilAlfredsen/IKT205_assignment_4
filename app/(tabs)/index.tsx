@@ -1,5 +1,7 @@
 import { supabase } from "@/lib/supabase";
+import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -8,10 +10,23 @@ import {
   View,
 } from "react-native";
 import { useNotes } from "../../context/NoteContext";
+import { useAuthContext } from "../../hooks/auth-context";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { notes } = useNotes();
+  const { session } = useAuthContext();
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Notification permissions denied!");
+      }
+    };
+
+    requestPermissions();
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
