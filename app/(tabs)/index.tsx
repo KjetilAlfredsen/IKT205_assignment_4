@@ -1,13 +1,14 @@
 import { supabase } from "@/lib/supabase";
+import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useNotes } from "../../context/NoteContext";
 import { useAuthContext } from "../../hooks/auth-context";
@@ -18,15 +19,54 @@ export default function HomeScreen() {
   const { session } = useAuthContext();
 
   useEffect(() => {
-    const requestPermissions = async () => {
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== "granted") {
+    const registerForPushToken = async () => {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== "granted") {
         console.log("Notification permissions denied!");
+      }
+
+      try {
+        const projectId =
+          Constants?.expoConfig?.extra?.eas?.projectId ??
+          Constants?.easConfig?.projectId;
+
+        if (!projectId) {
+          console.log("Project ID not found in config.");
+          return;
+        }
+
+        const tokenResponse = await Notifications.getExpoPushTokenAsync({
+          projectId,
+        });
+
+        const token = tokenResponse.data;
+        console.log("Expo Push Token:", token);
+
+        if (session?.user?.id && token) {
+          const { error } = await supabase
+            .from("profiles")
+            .upsert({ id: session.user.id, push_token: token });
+
+          if (error) {
+            console.error("Error updating push token in Supabase:", error);
+          } else {
+            console.log("Push token updated successfully in Supabase.");
+          }
+        }
+      } catch (error) {
+        console.error("Error during push token registration:", error);
       }
     };
 
-    requestPermissions();
-  }, []);
+    registerForPushToken();
+  }, [session]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
